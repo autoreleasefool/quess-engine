@@ -6,5 +6,11 @@ trailing_comma:
 
 identifier_name:
   excluded:
+    - i
     - id
+    - x
+    - y
+    - from
+    - to
+    - in
 

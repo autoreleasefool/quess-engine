@@ -1,6 +1,11 @@
-public struct QuessEngine {
-    public private(set) var text = "Hello, World!"
+//
+//  Created by Joseph Roque on 2021-11-10.
+//
 
-    public init() {
-    }
+public class GameState {
+
+  public let board = Board()
+
+  public init() {
+  }
 }
