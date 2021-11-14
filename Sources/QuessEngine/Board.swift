@@ -8,39 +8,72 @@ public class Board {
 
   public static let size = 6
 
-  private var grid: [Int: Piece]
+  private var grid: [Board.Notation: Piece]
+  private var pieces: [Piece: Board.Notation]
 
   public init() {
     self.grid = [
       // Create white pieces
-      Notation.D1.asCoordinate: Piece(owner: .white, class: .triangle),
-      Notation.E2.asCoordinate: Piece(owner: .white, class: .triangle),
-      Notation.F3.asCoordinate: Piece(owner: .white, class: .triangle),
-      Notation.E1.asCoordinate: Piece(owner: .white, class: .circle),
-      Notation.F2.asCoordinate: Piece(owner: .white, class: .circle),
-      Notation.F1.asCoordinate: Piece(owner: .white, class: .square),
+      .D1: Piece(owner: .white, class: .triangle, index: 0),
+      .E2: Piece(owner: .white, class: .triangle, index: 1),
+      .F3: Piece(owner: .white, class: .triangle, index: 2),
+      .E1: Piece(owner: .white, class: .circle, index: 0),
+      .F2: Piece(owner: .white, class: .circle, index: 1),
+      .F1: Piece(owner: .white, class: .square, index: 0),
 
       // Create black pieces
-      Notation.A4.asCoordinate: Piece(owner: .black, class: .triangle),
-      Notation.B5.asCoordinate: Piece(owner: .black, class: .triangle),
-      Notation.C6.asCoordinate: Piece(owner: .black, class: .triangle),
-      Notation.A5.asCoordinate: Piece(owner: .black, class: .circle),
-      Notation.B6.asCoordinate: Piece(owner: .black, class: .circle),
-      Notation.A6.asCoordinate: Piece(owner: .black, class: .square),
+      .A4: Piece(owner: .black, class: .triangle, index: 0),
+      .B5: Piece(owner: .black, class: .triangle, index: 1),
+      .C6: Piece(owner: .black, class: .triangle, index: 2),
+      .A5: Piece(owner: .black, class: .circle, index: 0),
+      .B6: Piece(owner: .black, class: .circle, index: 1),
+      .A6: Piece(owner: .black, class: .square, index: 0),
     ]
+
+    self.pieces = [:]
+    self.grid.forEach { position, piece in
+      self.pieces[piece] = position
+    }
+  }
+
+  // MARK: Pieces
+
+  public func whitePieces() -> [Piece] {
+    grid.values
+      .filter { $0.owner == .white }
+  }
+
+  public func blackPieces() -> [Piece] {
+    grid.values
+      .filter { $0.owner == .black }
+  }
+
+  public func pieces(forPlayer player: Player) -> [Piece] {
+    switch player {
+    case .white:
+      return whitePieces()
+    case .black:
+      return blackPieces()
+    }
   }
 
   public func pieceAt(x: Int, y: Int) -> Piece? {
-    guard (0..<Board.size).contains(x) && (0..<Board.size).contains(y) else {
+    guard let position = Board.Notation(rawValue: y * Board.size + x) else {
       return nil
     }
 
-    return grid[Board.coordinateToIndex(x: x, y: y)]
+    return grid[position]
   }
 
   public func pieceAt(_ notation: Notation) -> Piece? {
-    grid[notation.asCoordinate]
+    grid[notation]
   }
+
+  public func position(ofPiece piece: Piece) -> Board.Notation? {
+    pieces[piece]
+  }
+
+  // MARK: Board spaces
 
   public func isEmptyAt(x: Int, y: Int) -> Bool {
     pieceAt(x: x, y: y) == nil
@@ -50,11 +83,42 @@ public class Board {
     pieceAt(notation) == nil
   }
 
-  // MARK: Coordinates
+  // MARK: Movements
 
-  public static func coordinateToIndex(x: Int, y: Int) -> Int {
-    return y * Board.size + x
+  func apply(_ movement: Movement) -> Update {
+    let captured = grid[movement.to]
+    grid[movement.from] = nil
+    grid[movement.to] = movement.piece
+
+    pieces[movement.piece] = movement.to
+    if let captured = captured {
+      pieces[captured] = nil
+    }
+
+    return Update(movement: movement, capture: captured)
   }
+
+  func undo(_ update: Update) {
+    grid[update.movement.to] = update.capture
+    grid[update.movement.from] = update.movement.piece
+
+    pieces[update.movement.piece] = update.movement.from
+    if let captured = update.capture {
+      pieces[captured] = update.movement.to
+    }
+  }
+
+}
+
+// MARK: - Updates
+
+extension Board {
+
+  struct Update {
+    let movement: Movement
+    let capture: Piece?
+  }
+
 }
 
 // MARK: - Notation
@@ -63,7 +127,7 @@ extension Board {
 
   // swiftlint:disable identifier_name
 
-  public enum Notation: Int {
+  public enum Notation: Int, Hashable {
     case A1, A2, A3, A4, A5, A6
     case B1, B2, B3, B4, B5, B6
     case C1, C2, C3, C4, C5, C6
@@ -71,8 +135,8 @@ extension Board {
     case E1, E2, E3, E4, E5, E6
     case F1, F2, F3, F4, F5, F6
 
-    public var asCoordinate: Int {
-      return rawValue
+    public var toCoord: (x: Int, y: Int) {
+      (rawValue % 6, rawValue / 6)
     }
 
     public func isWithinStartZone(for player: Player) -> Bool {
@@ -82,8 +146,35 @@ extension Board {
       default: return false
       }
     }
+
+    var up: Notation? {
+      Notation(rawValue: rawValue - 6)
+    }
+
+    var down: Notation? {
+      Notation(rawValue: rawValue + 6)
+    }
+
+    var left: Notation? {
+      let (x, y) = toCoord
+      return ((y - 1) * 6 + x).toNotation
+    }
+
+    var right: Notation? {
+      let (x, y) = toCoord
+      return ((y + 1) * 6 + x).toNotation
+    }
+
+    public func adding(x xd: Int? = nil, y yd: Int? = nil) -> Notation? {
+      let (x, y) = toCoord
+      return ((y + (yd ?? 0)) * 6 + x + (xd ?? 0)).toNotation
+    }
+
+    public func subtracting(x xd: Int? = nil, y yd: Int? = nil) -> Notation? {
+      let (x, y) = toCoord
+      return ((y - (yd ?? 0)) * 6 + x - (xd ?? 0)).toNotation
+    }
   }
 
   // swiftlint:enable identifier_name
-
 }

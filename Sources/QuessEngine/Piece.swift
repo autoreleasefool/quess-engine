@@ -4,17 +4,24 @@
 
 import Foundation
 
-public struct Piece: Equatable {
+public struct Piece: Hashable {
 
   public let owner: Player
   public let `class`: Class
+  public let index: Int
+
+  public init(owner: Player, class: Class, index: Int) {
+    self.owner = owner
+    self.class = `class`
+    self.index = index
+  }
 
   public func canMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
     // Can't move to a position you already occupy
     guard from != to else { return false }
 
+    // Unable to capture an identical piece
     if let pieceAtPosition = state.board.pieceAt(to), pieceAtPosition.class == self.class {
-      // Unable to capture an identical piece
       return false
     }
 
@@ -25,20 +32,52 @@ public struct Piece: Equatable {
     }
   }
 
+  public func moves(in state: GameState) -> [Movement] {
+    switch self.class {
+    case .circle: return movesAsCircle(in: state)
+    case .triangle: return movesAsTriangle(in: state)
+    case .square: return movesAsSquare(in: state)
+    }
+  }
+
 }
 
 // MARK: - Type
 
 extension Piece {
 
-  public enum Class: Equatable {
+  public enum Class: Hashable {
     case triangle
     case circle
     case square
   }
 
+}
+
+// MARK: - Circle
+
+extension Piece {
+
+  private func movesAsCircle(in state: GameState) -> [Movement] {
+    guard let position = state.board.position(ofPiece: self) else { return [] }
+    return [
+      (-2, 1),
+      (-2, -1),
+      (-1, 2),
+      (-1, -2),
+      (1, 2),
+      (1, -2),
+      (2, 1),
+      (2, -1),
+    ].compactMap {
+      guard let dest = position.adding(x: $0, y: $1) else { return nil }
+      return Movement(piece: self, from: position, to: dest)
+    }
+  }
+
   private static func circleCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
-    let (fromX, fromY, toX, toY) = Piece.notationToCoords(from: from, to: to)
+    let (fromX, fromY) = from.toCoord
+    let (toX, toY) = to.toCoord
 
     return (
       (fromX + 2 == toX && (fromY == toY - 1 || fromY == toY + 1)) ||
@@ -48,70 +87,85 @@ extension Piece {
     )
   }
 
-  private static func triangleCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
-    let (fromX, fromY, toX, toY) = Piece.notationToCoords(from: from, to: to)
+}
 
-    return (
-      (fromX + 1 == toX && fromY == toY) ||
-      (fromX - 1 == toX && fromY == toY) ||
-      (fromX == toX && fromY + 1 == toY) ||
-      (fromX == toX && fromY - 1 == toY)
-    )
+// MARK: - Triangle
+
+extension Piece {
+
+  private func movesAsTriangle(in state: GameState) -> [Movement] {
+    guard let position = state.board.position(ofPiece: self) else { return [] }
+
+    return [
+      (-1, 0),
+      (1, 0),
+      (0, -1),
+      (0, 1),
+    ].compactMap {
+      guard let dest = position.adding(x: $0, y: $1) else { return nil }
+      return Movement(piece: self, from: position, to: dest)
+    }
   }
 
-  // swiftlint:disable:next cyclomatic_complexity
-  private static func squareCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
-    let (fromX, fromY, toX, toY) = Piece.notationToCoords(from: from, to: to)
+  private static func triangleCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+    from.up == to || from.down == to || from.left == to || from.right == to
+  }
 
-    if fromX == toX {
-      if fromY < toY {
-        for i in (fromY + 1...toY) {
-          if !state.board.isEmptyAt(x: fromX, y: i) {
-            return false
-          }
+}
+
+// MARK: - Square
+
+extension Piece {
+
+  private func movesAsSquare(in state: GameState) -> [Movement] {
+    guard let startPosition = state.board.position(ofPiece: self) else { return [] }
+    var moves: [Movement] = []
+
+    var previousPosition = startPosition
+    let directions: [KeyPath<Board.Notation, Board.Notation?>] = [\.left, \.right, \.up, \.down]
+    directions.forEach { direction in
+      while let targetPosition = previousPosition[keyPath: direction] {
+        if state.board.isEmpty(at: targetPosition) {
+          moves.append(Movement(piece: self, from: startPosition, to: targetPosition))
+        } else {
+          break
         }
-
-        return true
-      } else if fromY > toY {
-        for i in (toY..<fromY) {
-          if !state.board.isEmptyAt(x: fromX, y: i) {
-            return false
-          }
-        }
-
-        return true
-      }
-    } else if fromY == toY {
-      if fromX < toX {
-        for i in (fromX + 1...toX) {
-          if !state.board.isEmptyAt(x: i, y: fromY) {
-            return false
-          }
-        }
-
-        return true
-      } else if fromX > toX {
-        for i in (toY..<fromY) {
-          if !state.board.isEmptyAt(x: i, y: fromY) {
-            return false
-          }
-        }
-
-        return true
+        previousPosition = targetPosition
       }
     }
 
-    return false
+    return moves
   }
 
-  // swiftlint:disable:next large_tuple
-  private static func notationToCoords(from: Board.Notation, to: Board.Notation) -> (Int, Int, Int, Int) {
-    let fromCoord = from.asCoordinate
-    let (fromX, fromY) = (fromCoord % Board.size, fromCoord / Board.size)
-    let toCoord = to.asCoordinate
-    let (toX, toY) = (toCoord % Board.size, toCoord / Board.size)
+  private static func squareCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+    let (fromX, fromY) = from.toCoord
+    let (toX, toY) = to.toCoord
 
-    return (fromX, fromY, toX, toY)
+    if fromX == toX {
+      let startY = fromY < toY ? fromY : toY
+      let endY = fromY > toY ? fromY : toY
+
+      for i in (startY + 1...endY) {
+        if !state.board.isEmptyAt(x: fromX, y: i) {
+          return false
+        }
+      }
+
+      return true
+    } else if fromY == toY {
+      let startX = fromX < toX ? fromX : toX
+      let endX = fromX > toX ? fromX : toX
+
+      for i in (startX + 1...endX) {
+        if !state.board.isEmptyAt(x: i, y: fromY) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    return false
   }
 
 }

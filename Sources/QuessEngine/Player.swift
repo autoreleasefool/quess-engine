@@ -4,9 +4,7 @@
 
 import Foundation
 
-public enum Player {
-
+public enum Player: Hashable {
   case white
   case black
-
 }
