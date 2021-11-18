@@ -1,6 +1,15 @@
 //
 //  Created by Joseph Roque on 2021-11-10.
 //
+//     -----------------------
+//  6 |   |   |   | ▲ | ● | ■ |
+//  5 |   |   |   |   | ▲ | ● |
+//  4 |   |   |   |   |   | ▲ |
+//  3 | △ |   |   |   |   |   |
+//  2 | ○ | △ |   |   |   |   |
+//  1 | □ | ○ | △ |   |   |   |
+//     -----------------------
+//      A   B   C   D   E   F
 
 import Foundation
 
@@ -14,20 +23,20 @@ public class Board {
   public init() {
     self.grid = [
       // Create white pieces
-      .D1: Piece(owner: .white, class: .triangle, index: 0),
-      .E2: Piece(owner: .white, class: .triangle, index: 1),
-      .F3: Piece(owner: .white, class: .triangle, index: 2),
-      .E1: Piece(owner: .white, class: .circle, index: 0),
-      .F2: Piece(owner: .white, class: .circle, index: 1),
-      .F1: Piece(owner: .white, class: .square, index: 0),
+      .C1: Piece(owner: .white, class: .triangle, index: 0),
+      .B2: Piece(owner: .white, class: .triangle, index: 1),
+      .A3: Piece(owner: .white, class: .triangle, index: 2),
+      .B1: Piece(owner: .white, class: .circle, index: 0),
+      .A2: Piece(owner: .white, class: .circle, index: 1),
+      .A1: Piece(owner: .white, class: .square, index: 0),
 
       // Create black pieces
-      .A4: Piece(owner: .black, class: .triangle, index: 0),
-      .B5: Piece(owner: .black, class: .triangle, index: 1),
-      .C6: Piece(owner: .black, class: .triangle, index: 2),
-      .A5: Piece(owner: .black, class: .circle, index: 0),
-      .B6: Piece(owner: .black, class: .circle, index: 1),
-      .A6: Piece(owner: .black, class: .square, index: 0),
+      .F4: Piece(owner: .black, class: .triangle, index: 0),
+      .E5: Piece(owner: .black, class: .triangle, index: 1),
+      .D6: Piece(owner: .black, class: .triangle, index: 2),
+      .F5: Piece(owner: .black, class: .circle, index: 0),
+      .E6: Piece(owner: .black, class: .circle, index: 1),
+      .F6: Piece(owner: .black, class: .square, index: 0),
     ]
 
     self.pieces = [:]
