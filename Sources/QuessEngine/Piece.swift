@@ -50,6 +50,13 @@ extension Piece {
     case triangle
     case circle
     case square
+
+    public var isUniquePerPlayer: Bool {
+      switch self {
+      case .triangle, .circle: return false
+      case .square: return true
+      }
+    }
   }
 
 }
