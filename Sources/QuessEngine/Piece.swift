@@ -16,7 +16,10 @@ public struct Piece: Hashable {
     self.index = index
   }
 
-  public func canMove(from: Board.RankFile, to: Board.RankFile, in state: GameState) -> Bool {
+  public func canMove(to: Board.RankFile, in state: GameState) -> Bool {
+    // Piece must be on the board
+    guard let from = state.board.position(ofPiece: self) else { return false }
+
     // Can't move to a position you already occupy
     guard from != to else { return false }
 
@@ -78,7 +81,7 @@ extension Piece {
       (2, -1),
     ].compactMap {
       guard let dest = position.adding(x: $0, y: $1) else { return nil }
-      return Movement(piece: self, from: position, to: dest)
+      return Movement(piece: self, to: dest)
     }
   }
 
@@ -110,7 +113,7 @@ extension Piece {
       (0, 1),
     ].compactMap {
       guard let dest = position.adding(x: $0, y: $1) else { return nil }
-      return Movement(piece: self, from: position, to: dest)
+      return Movement(piece: self, to: dest)
     }
   }
 
@@ -133,7 +136,7 @@ extension Piece {
     directions.forEach { direction in
       while let targetPosition = previousPosition[keyPath: direction] {
         if state.board.isEmpty(at: targetPosition) {
-          moves.append(Movement(piece: self, from: startPosition, to: targetPosition))
+          moves.append(Movement(piece: self, to: targetPosition))
         } else {
           break
         }

@@ -94,24 +94,24 @@ public class Board {
 
   // MARK: Movements
 
-  func apply(_ movement: Movement) -> Update {
-    let captured = grid[movement.to]
-    grid[movement.from] = nil
-    grid[movement.to] = movement.piece
+  func move(piece: Piece, from: Board.RankFile, to: Board.RankFile) -> Update {
+    let captured = grid[to]
+    grid[from] = nil
+    grid[to] = piece
 
-    pieces[movement.piece] = movement.to
+    pieces[piece] = to
     if let captured = captured {
       pieces[captured] = nil
     }
 
-    return Update(movement: movement, capture: captured)
+    return Update(movement: Movement(piece: piece, to: to), from: from, capture: captured)
   }
 
   func undo(_ update: Update) {
     grid[update.movement.to] = update.capture
-    grid[update.movement.from] = update.movement.piece
+    grid[update.from] = update.movement.piece
 
-    pieces[update.movement.piece] = update.movement.from
+    pieces[update.movement.piece] = update.from
     if let captured = update.capture {
       pieces[captured] = update.movement.to
     }
@@ -125,6 +125,7 @@ extension Board {
 
   struct Update {
     let movement: Movement
+    let from: Board.RankFile
     let capture: Piece?
   }
 

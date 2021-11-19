@@ -42,13 +42,13 @@ public class GameState {
   public func check(_ movement: Movement) -> Bool {
     return !isFinished &&
       movement.piece.owner == currentPlayer &&
-      movement.piece.canMove(from: movement.from, to: movement.to, in: self)
+      movement.piece.canMove(to: movement.to, in: self)
   }
 
   public func apply(_ movement: Movement) -> Bool {
-    guard check(movement) else { return false }
+    guard let from = board.position(ofPiece: movement.piece), check(movement) else { return false }
 
-    let update = board.apply(movement)
+    let update = board.move(piece: movement.piece, from: from, to: movement.to)
     updates.append(update)
     currentPlayer = currentPlayer.next
 

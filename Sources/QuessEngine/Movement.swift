@@ -7,12 +7,10 @@ import Foundation
 public struct Movement: Hashable {
 
   public let piece: Piece
-  public let from: Board.RankFile
   public let to: Board.RankFile
 
-  public init(piece: Piece, from: Board.RankFile, to: Board.RankFile) {
+  public init(piece: Piece, to: Board.RankFile) {
     self.piece = piece
-    self.from = from
     self.to = to
   }
 

@@ -103,24 +103,24 @@ extension Movement {
     "\(piece.notation)\(to.notation)"
   }
 
-}
-
-extension GameState {
-
-  public func movement(forNotation notation: String) -> Movement? {
+  public init?(notation: String) {
     guard (4...5).contains(notation.count),
           let piece = Piece(notation: String(notation.dropLast(2))),
-          let from = self.board.position(ofPiece: piece),
           let to = Board.RankFile(notation: String(notation.suffix(2)))
     else {
       return nil
     }
 
-    return Movement(piece: piece, from: from, to: to)
+    self.piece = piece
+    self.to = to
   }
 
+}
+
+extension GameState {
+
   public func apply(_ notation: String) -> Bool {
-    guard let movement = self.movement(forNotation: notation) else { return false }
+    guard let movement = Movement(notation: notation) else { return false }
     return self.apply(movement)
   }
 
