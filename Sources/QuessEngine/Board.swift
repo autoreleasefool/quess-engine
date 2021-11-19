@@ -17,8 +17,8 @@ public class Board {
 
   public static let size = 6
 
-  private var grid: [Board.Notation: Piece]
-  private var pieces: [Piece: Board.Notation]
+  private var grid: [Board.RankFile: Piece]
+  private var pieces: [Piece: Board.RankFile]
 
   public init() {
     self.grid = [
@@ -67,18 +67,18 @@ public class Board {
   }
 
   public func pieceAt(x: Int, y: Int) -> Piece? {
-    guard let position = Board.Notation(rawValue: y * Board.size + x) else {
+    guard let position = Board.RankFile(rawValue: y * Board.size + x) else {
       return nil
     }
 
     return grid[position]
   }
 
-  public func pieceAt(_ notation: Notation) -> Piece? {
-    grid[notation]
+  public func pieceAt(_ rankFile: RankFile) -> Piece? {
+    grid[rankFile]
   }
 
-  public func position(ofPiece piece: Piece) -> Board.Notation? {
+  public func position(ofPiece piece: Piece) -> Board.RankFile? {
     pieces[piece]
   }
 
@@ -88,8 +88,8 @@ public class Board {
     pieceAt(x: x, y: y) == nil
   }
 
-  public func isEmpty(at notation: Notation) -> Bool {
-    pieceAt(notation) == nil
+  public func isEmpty(at rankFile: RankFile) -> Bool {
+    pieceAt(rankFile) == nil
   }
 
   // MARK: Movements
@@ -130,13 +130,13 @@ extension Board {
 
 }
 
-// MARK: - Notation
+// MARK: - RankFile
 
 extension Board {
 
   // swiftlint:disable identifier_name
 
-  public enum Notation: Int, Hashable {
+  public enum RankFile: Int, Hashable {
     case A1, A2, A3, A4, A5, A6
     case B1, B2, B3, B4, B5, B6
     case C1, C2, C3, C4, C5, C6
@@ -156,32 +156,32 @@ extension Board {
       }
     }
 
-    var up: Notation? {
-      Notation(rawValue: rawValue - 6)
+    var up: RankFile? {
+      RankFile(rawValue: rawValue - 6)
     }
 
-    var down: Notation? {
-      Notation(rawValue: rawValue + 6)
+    var down: RankFile? {
+      RankFile(rawValue: rawValue + 6)
     }
 
-    var left: Notation? {
+    var left: RankFile? {
       let (x, y) = toCoord
-      return ((y - 1) * 6 + x).toNotation
+      return ((y - 1) * 6 + x).toRankFile
     }
 
-    var right: Notation? {
+    var right: RankFile? {
       let (x, y) = toCoord
-      return ((y + 1) * 6 + x).toNotation
+      return ((y + 1) * 6 + x).toRankFile
     }
 
-    public func adding(x xd: Int? = nil, y yd: Int? = nil) -> Notation? {
+    public func adding(x xd: Int? = nil, y yd: Int? = nil) -> RankFile? {
       let (x, y) = toCoord
-      return ((y + (yd ?? 0)) * 6 + x + (xd ?? 0)).toNotation
+      return ((y + (yd ?? 0)) * 6 + x + (xd ?? 0)).toRankFile
     }
 
-    public func subtracting(x xd: Int? = nil, y yd: Int? = nil) -> Notation? {
+    public func subtracting(x xd: Int? = nil, y yd: Int? = nil) -> RankFile? {
       let (x, y) = toCoord
-      return ((y - (yd ?? 0)) * 6 + x - (xd ?? 0)).toNotation
+      return ((y - (yd ?? 0)) * 6 + x - (xd ?? 0)).toRankFile
     }
   }
 

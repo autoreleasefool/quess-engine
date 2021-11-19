@@ -6,8 +6,8 @@ import Foundation
 
 extension Int {
 
-  var toNotation: Board.Notation? {
-    Board.Notation(rawValue: self)
+  public var toRankFile: Board.RankFile? {
+    Board.RankFile(rawValue: self)
   }
 
 }

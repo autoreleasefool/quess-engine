@@ -18,4 +18,5 @@ public enum Player: Hashable {
   var opponent: Player {
     next
   }
+
 }

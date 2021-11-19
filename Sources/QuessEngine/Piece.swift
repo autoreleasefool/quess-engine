@@ -16,7 +16,7 @@ public struct Piece: Hashable {
     self.index = index
   }
 
-  public func canMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+  public func canMove(from: Board.RankFile, to: Board.RankFile, in state: GameState) -> Bool {
     // Can't move to a position you already occupy
     guard from != to else { return false }
 
@@ -75,7 +75,7 @@ extension Piece {
     }
   }
 
-  private static func circleCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+  private static func circleCanMove(from: Board.RankFile, to: Board.RankFile, in state: GameState) -> Bool {
     let (fromX, fromY) = from.toCoord
     let (toX, toY) = to.toCoord
 
@@ -107,7 +107,7 @@ extension Piece {
     }
   }
 
-  private static func triangleCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+  private static func triangleCanMove(from: Board.RankFile, to: Board.RankFile, in state: GameState) -> Bool {
     from.up == to || from.down == to || from.left == to || from.right == to
   }
 
@@ -122,7 +122,7 @@ extension Piece {
     var moves: [Movement] = []
 
     var previousPosition = startPosition
-    let directions: [KeyPath<Board.Notation, Board.Notation?>] = [\.left, \.right, \.up, \.down]
+    let directions: [KeyPath<Board.RankFile, Board.RankFile?>] = [\.left, \.right, \.up, \.down]
     directions.forEach { direction in
       while let targetPosition = previousPosition[keyPath: direction] {
         if state.board.isEmpty(at: targetPosition) {
@@ -137,7 +137,7 @@ extension Piece {
     return moves
   }
 
-  private static func squareCanMove(from: Board.Notation, to: Board.Notation, in state: GameState) -> Bool {
+  private static func squareCanMove(from: Board.RankFile, to: Board.RankFile, in state: GameState) -> Bool {
     let (fromX, fromY) = from.toCoord
     let (toX, toY) = to.toCoord
 
