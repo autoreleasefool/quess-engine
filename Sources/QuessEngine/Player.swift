@@ -8,14 +8,14 @@ public enum Player: Hashable {
   case white
   case black
 
-  var next: Player {
+  public var next: Player {
     switch self {
     case .white: return .black
     case .black: return .white
     }
   }
 
-  var opponent: Player {
+  public var opponent: Player {
     next
   }
 
