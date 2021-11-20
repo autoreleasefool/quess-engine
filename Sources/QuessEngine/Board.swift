@@ -47,23 +47,9 @@ public class Board {
 
   // MARK: Pieces
 
-  public func whitePieces() -> [Piece] {
-    grid.values
-      .filter { $0.owner == .white }
-  }
-
-  public func blackPieces() -> [Piece] {
-    grid.values
-      .filter { $0.owner == .black }
-  }
-
   public func pieces(forPlayer player: Player) -> [Piece] {
-    switch player {
-    case .white:
-      return whitePieces()
-    case .black:
-      return blackPieces()
-    }
+    grid.values
+      .filter { $0.owner == player }
   }
 
   public func pieceAt(x: Int, y: Int) -> Piece? {
@@ -82,6 +68,12 @@ public class Board {
     pieces[piece]
   }
 
+  public func piecesAndPositions(forPlayer player: Player) -> [(Piece, Board.RankFile)] {
+    grid
+      .filter { $0.value.owner == player }
+      .map { ($0.value, $0.key) }
+  }
+
   // MARK: Board spaces
 
   public func isEmptyAt(x: Int, y: Int) -> Bool {
@@ -90,6 +82,22 @@ public class Board {
 
   public func isEmpty(at rankFile: RankFile) -> Bool {
     pieceAt(rankFile) == nil
+  }
+
+  public func atLeastTwoOpponentPieces(inStartZoneFor zonePlayer: Player) -> Bool {
+    let zone = zonePlayer == .white ? RankFile.whiteZone : RankFile.blackZone
+
+    var foundInZone = 0
+    for (_, position) in piecesAndPositions(forPlayer: zonePlayer.opponent) {
+      if zone.contains(position) {
+        foundInZone += 1
+        if foundInZone >= 2 {
+          return true
+        }
+      }
+    }
+
+    return false
   }
 
   // MARK: Movements
@@ -149,11 +157,13 @@ extension Board {
       (rawValue % 6, rawValue / 6)
     }
 
+    public static let blackZone: Set<RankFile> = [.D6, .E6, .F6, .E5, .F5, .F4]
+    public static let whiteZone: Set<RankFile> = [.A1, .B1, .C1, .A2, .B2, .A3]
+
     public func isWithinStartZone(for player: Player) -> Bool {
-      switch self {
-      case .A1, .B1, .C1, .A2, .B2, .A3: return player == .white
-      case .D6, .E6, .F6, .E5, .F5, .F4: return player == .black
-      default: return false
+      switch player {
+      case .black: return RankFile.blackZone.contains(self)
+      case .white: return RankFile.whiteZone.contains(self)
       }
     }
 

@@ -70,14 +70,12 @@ public class GameState {
     let player = lastMove.piece.owner
     let opponent = lastMove.piece.owner.opponent
 
-    if board.blackPieces().count == 1 && board.whitePieces().count == 1 {
+    if board.pieces(forPlayer: .white).count == 1 && board.pieces(forPlayer: .black).count == 1 {
       endState = .draw
       return
     }
 
-    if board.pieces(forPlayer: player).contains(where: {
-      board.position(ofPiece: $0)?.isWithinStartZone(for: opponent) ?? false
-    }) {
+    if board.atLeastTwoOpponentPieces(inStartZoneFor: opponent) {
       endState = .ended(winner: player)
       return
     }

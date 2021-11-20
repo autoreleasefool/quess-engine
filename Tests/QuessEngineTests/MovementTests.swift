@@ -7,104 +7,82 @@ import XCTest
 
 final class MovementTests: XCTestCase {
 
-  func testWhiteInitialValidMoves() {
-    let state = GameState()
-    let expectedMoves = [
-      Movement(notation: "wC1B4"),
-      Movement(notation: "wC1C3"),
-      Movement(notation: "wC2C3"),
-      Movement(notation: "wC2D2"),
-      Movement(notation: "wT1A4"),
-      Movement(notation: "wT1B3"),
-      Movement(notation: "wT2B3"),
-      Movement(notation: "wT2C2"),
-      Movement(notation: "wT3C2"),
-      Movement(notation: "wT3D1"),
-    ].compactMap { $0 }
-      .map(\.notation)
-      .sorted()
+  let stateProvider = StateProvider(debugging: false)
 
-    let possibleMoves = state.allPossibleMoves()
-      .map(\.notation)
-      .sorted()
+  func testWhiteInitialValidMoves() {
+    let state = stateProvider.buildState(withMoves: [])
+    let expectedMoves = stateProvider.validNotation(fromNotation: [
+      "wC1B4", "wC1C3",
+      "wC2C3", "wC2D2",
+      "wT1A4", "wT1B3",
+      "wT2B3", "wT2C2",
+      "wT3C2", "wT3D1",
+    ])
+
+    let possibleMoves = stateProvider.notation(fromMoves: state.allPossibleMoves())
 
     XCTAssertEqual(possibleMoves, expectedMoves)
   }
 
   func testBlackInitialValidMoves() {
-    let state = GameState()
-    _ = state.apply("wT1A4")
+    let state = stateProvider.buildState(withMoves: ["wT1A4"])
 
-    let expectedMoves = [
-      Movement(notation: "bC1C5"),
-      Movement(notation: "bC1D4"),
-      Movement(notation: "bC2D4"),
-      Movement(notation: "bC2E3"),
-      Movement(notation: "bT1C6"),
-      Movement(notation: "bT1D5"),
-      Movement(notation: "bT2D5"),
-      Movement(notation: "bT2E4"),
-      Movement(notation: "bT3E4"),
-      Movement(notation: "bT3F3"),
-    ].compactMap { $0 }
-      .map(\.notation)
-      .sorted()
+    let expectedMoves = stateProvider.validNotation(fromNotation: [
+      "bC1C5", "bC1D4",
+      "bC2D4", "bC2E3",
+      "bT1C6", "bT1D5",
+      "bT2D5", "bT2E4", "bT3E4", "bT3F3",
+    ])
 
-    let possibleMoves = state.allPossibleMoves()
-      .map(\.notation)
-      .sorted()
+    let possibleMoves = stateProvider.notation(fromMoves: state.allPossibleMoves())
 
     XCTAssertEqual(possibleMoves, expectedMoves)
   }
 
   func testSquareMoves() {
-    let state = GameState()
-    XCTAssert(state.apply("wT1A4"))
-    XCTAssert(state.apply("bT1C6"))
-    XCTAssert(state.apply("wC1C3"))
-    XCTAssert(state.apply("bC1D4"))
-    XCTAssert(state.apply("wT1A5"))
-    XCTAssert(state.apply("bT1B6"))
-    XCTAssert(state.apply("wSA4"))
-    XCTAssert(state.apply("bSC6"))
+    let state = stateProvider.buildState(withMoves: [
+      "wT1A4", "bT1C6", "wC1C3", "bC1D4", "wT1A5", "bT1B6", "wSA4", "bSC6",
+    ])
 
-    let expectedWhiteSquareMoves = [
-      Movement(notation: "wSA1"),
-      Movement(notation: "wSA2"),
-      Movement(notation: "wSA3"),
-      Movement(notation: "wSB4"),
-      Movement(notation: "wSC4"),
-      Movement(notation: "wSD4"),
-    ].compactMap { $0 }
-      .map(\.notation)
-      .sorted()
+    let expectedWhiteSquareMoves = stateProvider.validNotation(fromNotation: [
+      "wSA1", "wSA2", "wSA3", "wSB4", "wSC4", "wSD4",
+    ])
 
-    let possibleWhiteSquareMoves = state.allPossibleMoves()
-      .filter { $0.piece.class == .square }
-      .map(\.notation)
-      .sorted()
+    let possibleWhiteSquareMoves = stateProvider.notation(
+      fromMoves: state.allPossibleMoves()
+        .filter { $0.piece.class == .square }
+    )
 
     XCTAssertEqual(possibleWhiteSquareMoves, expectedWhiteSquareMoves)
 
     XCTAssert(state.apply("wSA3"))
 
-    let expectedBlackSquareMoves = [
-      Movement(notation: "bSD6"),
-      Movement(notation: "bSE6"),
-      Movement(notation: "bSF6"),
-      Movement(notation: "bSC5"),
-      Movement(notation: "bSC4"),
-      Movement(notation: "bSC3"),
-    ].compactMap { $0 }
-      .map(\.notation)
-      .sorted()
+    let expectedBlackSquareMoves = stateProvider.validNotation(fromNotation: [
+      "bSD6", "bSE6", "bSF6", "bSC5", "bSC4", "bSC3",
+    ])
 
-    let possibleBlackSquareMoves = state.allPossibleMoves()
-      .filter { $0.piece.class == .square }
-      .map(\.notation)
-      .sorted()
+    let possibleBlackSquareMoves = stateProvider.notation(
+      fromMoves: state.allPossibleMoves()
+        .filter { $0.piece.class == .square }
+    )
 
     XCTAssertEqual(possibleBlackSquareMoves, expectedBlackSquareMoves)
+  }
+
+  func testMoves() {
+    let state = stateProvider.buildState(withMoves: "wT1A4; bC1C5; wC1C3; bC1D3; wC2D2; bC1C1")
+
+    let expectedMoves = stateProvider.validNotation(fromNotation: [
+      "wT1A3", "wT1B4", "wT1A5",
+      "wT2A2", "wT2B3", "wT2B1", "wT2C2",
+      "wSA2", "wSA3", "wSB1", "wSC1",
+      "wC1B5", "wC1D5", "wC1E4", "wC1E2", "wC1D1", "wC1B1", "wC1A2",
+      "wC2B1", "wC2B3", "wC2C4", "wC2E4", "wC2F3", "wC2F1",
+    ])
+
+    let possibleMoves = stateProvider.notation(fromMoves: state.allPossibleMoves())
+
+    XCTAssertEqual(possibleMoves, expectedMoves)
   }
 
 }
