@@ -23,20 +23,20 @@ public class Board {
   public init() {
     self.grid = [
       // Create white pieces
-      .C1: Piece(owner: .white, class: .triangle, index: 0),
-      .B2: Piece(owner: .white, class: .triangle, index: 1),
-      .A3: Piece(owner: .white, class: .triangle, index: 2),
-      .B1: Piece(owner: .white, class: .circle, index: 0),
-      .A2: Piece(owner: .white, class: .circle, index: 1),
-      .A1: Piece(owner: .white, class: .square, index: 0),
+      .C1: Piece(owner: .white, class: .triangle, index: 1),
+      .B2: Piece(owner: .white, class: .triangle, index: 2),
+      .A3: Piece(owner: .white, class: .triangle, index: 3),
+      .B1: Piece(owner: .white, class: .circle, index: 1),
+      .A2: Piece(owner: .white, class: .circle, index: 2),
+      .A1: Piece(owner: .white, class: .square, index: 1),
 
       // Create black pieces
-      .F4: Piece(owner: .black, class: .triangle, index: 0),
-      .E5: Piece(owner: .black, class: .triangle, index: 1),
-      .D6: Piece(owner: .black, class: .triangle, index: 2),
-      .F5: Piece(owner: .black, class: .circle, index: 0),
-      .E6: Piece(owner: .black, class: .circle, index: 1),
-      .F6: Piece(owner: .black, class: .square, index: 0),
+      .F4: Piece(owner: .black, class: .triangle, index: 1),
+      .E5: Piece(owner: .black, class: .triangle, index: 2),
+      .D6: Piece(owner: .black, class: .triangle, index: 3),
+      .F5: Piece(owner: .black, class: .circle, index: 1),
+      .E6: Piece(owner: .black, class: .circle, index: 2),
+      .F6: Piece(owner: .black, class: .square, index: 1),
     ]
 
     self.pieces = [:]
