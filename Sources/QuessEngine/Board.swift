@@ -157,19 +157,19 @@ extension Board {
       }
     }
 
-    var up: RankFile? {
+    public var up: RankFile? {
       return self.subtracting(y: 1)
     }
 
-    var down: RankFile? {
+    public var down: RankFile? {
       return self.adding(y: 1)
     }
 
-    var left: RankFile? {
+    public var left: RankFile? {
       return self.subtracting(x: 1)
     }
 
-    var right: RankFile? {
+    public var right: RankFile? {
       return self.adding(x: 1)
     }
 

@@ -45,7 +45,7 @@ public class GameState {
       movement.piece.canMove(to: movement.to, in: self)
   }
 
-  public func apply(_ movement: Movement) -> Bool {
+  @discardableResult public func apply(_ movement: Movement) -> Bool {
     guard let from = board.position(ofPiece: movement.piece), check(movement) else { return false }
 
     let update = board.move(piece: movement.piece, from: from, to: movement.to)
