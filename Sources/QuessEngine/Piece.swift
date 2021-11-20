@@ -20,13 +20,8 @@ public struct Piece: Hashable {
     // Piece must be on the board
     guard let from = state.board.position(ofPiece: self) else { return false }
 
-    // Can't move to a position you already occupy
-    guard from != to else { return false }
-
-    // Unable to capture an identical piece
-    if let pieceAtPosition = state.board.pieceAt(to), pieceAtPosition.class == self.class {
-      return false
-    }
+    // Basic checks for valid positioning
+    guard self.canOccupy(position: to, from: from, in: state) else { return false }
 
     switch self.class {
     case .circle: return Piece.circleCanMove(from: from, to: to, in: state)
@@ -41,6 +36,19 @@ public struct Piece: Hashable {
     case .triangle: return movesAsTriangle(in: state)
     case .square: return movesAsSquare(in: state)
     }
+  }
+
+  private func canOccupy(position: Board.RankFile, from: Board.RankFile, in state: GameState) -> Bool {
+    // Can't move to a position you already occupy
+    guard from != position else { return false }
+
+    // Unable to capture an identical piece or color
+    if let pieceAtPosition = state.board.pieceAt(position),
+       pieceAtPosition.class == self.class || pieceAtPosition.owner == self.owner {
+      return false
+    }
+
+    return true
   }
 
 }
@@ -80,7 +88,11 @@ extension Piece {
       (2, 1),
       (2, -1),
     ].compactMap {
-      guard let dest = position.adding(x: $0, y: $1) else { return nil }
+      guard let dest = position.adding(x: $0, y: $1),
+            canOccupy(position: dest, from: position, in: state)
+      else {
+        return nil
+      }
       return Movement(piece: self, to: dest)
     }
   }
@@ -112,7 +124,11 @@ extension Piece {
       (0, -1),
       (0, 1),
     ].compactMap {
-      guard let dest = position.adding(x: $0, y: $1) else { return nil }
+      guard let dest = position.adding(x: $0, y: $1),
+            canOccupy(position: dest, from: position, in: state)
+      else {
+        return nil
+      }
       return Movement(piece: self, to: dest)
     }
   }
@@ -135,11 +151,14 @@ extension Piece {
     let directions: [KeyPath<Board.RankFile, Board.RankFile?>] = [\.left, \.right, \.up, \.down]
     directions.forEach { direction in
       while let targetPosition = previousPosition[keyPath: direction] {
-        if state.board.isEmpty(at: targetPosition) {
+        if canOccupy(position: targetPosition, from: startPosition, in: state) {
           moves.append(Movement(piece: self, to: targetPosition))
         } else {
           break
         }
+
+        // Stop searching when we've reached another piece
+        if state.board.pieceAt(targetPosition) != nil { break }
         previousPosition = targetPosition
       }
     }
@@ -155,7 +174,7 @@ extension Piece {
       let startY = fromY < toY ? fromY : toY
       let endY = fromY > toY ? fromY : toY
 
-      for i in (startY + 1...endY) {
+      for i in (startY + 1..<endY) {
         if !state.board.isEmptyAt(x: fromX, y: i) {
           return false
         }
@@ -166,7 +185,7 @@ extension Piece {
       let startX = fromX < toX ? fromX : toX
       let endX = fromX > toX ? fromX : toX
 
-      for i in (startX + 1...endX) {
+      for i in (startX + 1..<endX) {
         if !state.board.isEmptyAt(x: i, y: fromY) {
           return false
         }
