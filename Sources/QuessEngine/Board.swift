@@ -137,7 +137,7 @@ extension Board {
 
   // swiftlint:disable identifier_name
 
-  public enum RankFile: Int, Hashable {
+  public enum RankFile: Int, Hashable, CaseIterable {
     case A6, B6, C6, D6, E6, F6
     case A5, B5, C5, D5, E5, F5
     case A4, B4, C4, D4, E4, F4

@@ -66,7 +66,7 @@ public struct Piece: Hashable {
 
 extension Piece {
 
-  public enum Class: Hashable {
+  public enum Class: Hashable, CaseIterable {
     case triangle
     case circle
     case square
