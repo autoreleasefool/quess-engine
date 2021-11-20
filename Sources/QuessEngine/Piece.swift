@@ -38,6 +38,15 @@ public struct Piece: Hashable {
     }
   }
 
+  public func hasAnyMoves(in state: GameState) -> Bool {
+    switch self.class {
+    case .circle: return hasAnyMovesAsCircle(in: state)
+    case .triangle: return hasAnyMovesAsTriangle(in: state)
+    // Square just needs to be able to move one space in one direction, as a triangle
+    case .square: return hasAnyMovesAsTriangle(in: state)
+    }
+  }
+
   private func canOccupy(position: Board.RankFile, from: Board.RankFile, in state: GameState) -> Bool {
     // Can't move to a position you already occupy
     guard from != position else { return false }
@@ -76,24 +85,34 @@ extension Piece {
 
 extension Piece {
 
+  private static let circleMoveDeltas = [
+    (-2, 1),
+    (-2, -1),
+    (-1, 2),
+    (-1, -2),
+    (1, 2),
+    (1, -2),
+    (2, 1),
+    (2, -1),
+  ]
+
   private func movesAsCircle(in state: GameState) -> [Movement] {
     guard let position = state.board.position(ofPiece: self) else { return [] }
-    return [
-      (-2, 1),
-      (-2, -1),
-      (-1, 2),
-      (-1, -2),
-      (1, 2),
-      (1, -2),
-      (2, 1),
-      (2, -1),
-    ].compactMap {
+    return Self.circleMoveDeltas.compactMap {
       guard let dest = position.adding(x: $0, y: $1),
             canOccupy(position: dest, from: position, in: state)
       else {
         return nil
       }
       return Movement(piece: self, to: dest)
+    }
+  }
+
+  private func hasAnyMovesAsCircle(in state: GameState) -> Bool {
+    guard let position = state.board.position(ofPiece: self) else { return false }
+    return Self.circleMoveDeltas.contains {
+      guard let dest = position.adding(x: $0, y: $1) else { return false }
+      return canOccupy(position: dest, from: position, in: state)
     }
   }
 
@@ -115,21 +134,31 @@ extension Piece {
 
 extension Piece {
 
+  private static let triangleMoveDeltas = [
+    (-1, 0),
+    (1, 0),
+    (0, -1),
+    (0, 1),
+  ]
+
   private func movesAsTriangle(in state: GameState) -> [Movement] {
     guard let position = state.board.position(ofPiece: self) else { return [] }
 
-    return [
-      (-1, 0),
-      (1, 0),
-      (0, -1),
-      (0, 1),
-    ].compactMap {
+    return Self.triangleMoveDeltas.compactMap {
       guard let dest = position.adding(x: $0, y: $1),
             canOccupy(position: dest, from: position, in: state)
       else {
         return nil
       }
       return Movement(piece: self, to: dest)
+    }
+  }
+
+  private func hasAnyMovesAsTriangle(in state: GameState) -> Bool {
+    guard let position = state.board.position(ofPiece: self) else { return false }
+    return Self.triangleMoveDeltas.contains {
+      guard let dest = position.adding(x: $0, y: $1) else { return false }
+      return canOccupy(position: dest, from: position, in: state)
     }
   }
 
@@ -143,13 +172,14 @@ extension Piece {
 
 extension Piece {
 
+  private static let squareDirections: [KeyPath<Board.RankFile, Board.RankFile?>] = [\.left, \.right, \.up, \.down]
+
   private func movesAsSquare(in state: GameState) -> [Movement] {
     guard let startPosition = state.board.position(ofPiece: self) else { return [] }
     var moves: [Movement] = []
 
-    var previousPosition = startPosition
-    let directions: [KeyPath<Board.RankFile, Board.RankFile?>] = [\.left, \.right, \.up, \.down]
-    directions.forEach { direction in
+    Self.squareDirections.forEach { direction in
+      var previousPosition = startPosition
       while let targetPosition = previousPosition[keyPath: direction] {
         if canOccupy(position: targetPosition, from: startPosition, in: state) {
           moves.append(Movement(piece: self, to: targetPosition))

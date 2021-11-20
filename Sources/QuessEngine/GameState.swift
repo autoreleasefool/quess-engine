@@ -82,7 +82,8 @@ public class GameState {
       return
     }
 
-    if possibleMoves(forPlayer: opponent).isEmpty {
+    let pieces = board.pieces(forPlayer: opponent)
+    if !pieces.contains(where: { $0.hasAnyMoves(in: self) }) {
       endState = .ended(winner: player)
       return
     }

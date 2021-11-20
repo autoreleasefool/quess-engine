@@ -23,19 +23,19 @@ public class Board {
   public init() {
     self.grid = [
       // Create white pieces
-      .C1: Piece(owner: .white, class: .triangle, index: 1),
+      .A3: Piece(owner: .white, class: .triangle, index: 1),
       .B2: Piece(owner: .white, class: .triangle, index: 2),
-      .A3: Piece(owner: .white, class: .triangle, index: 3),
-      .B1: Piece(owner: .white, class: .circle, index: 1),
-      .A2: Piece(owner: .white, class: .circle, index: 2),
+      .C1: Piece(owner: .white, class: .triangle, index: 3),
+      .A2: Piece(owner: .white, class: .circle, index: 1),
+      .B1: Piece(owner: .white, class: .circle, index: 2),
       .A1: Piece(owner: .white, class: .square, index: 1),
 
       // Create black pieces
-      .F4: Piece(owner: .black, class: .triangle, index: 1),
+      .D6: Piece(owner: .black, class: .triangle, index: 1),
       .E5: Piece(owner: .black, class: .triangle, index: 2),
-      .D6: Piece(owner: .black, class: .triangle, index: 3),
-      .F5: Piece(owner: .black, class: .circle, index: 1),
-      .E6: Piece(owner: .black, class: .circle, index: 2),
+      .F4: Piece(owner: .black, class: .triangle, index: 3),
+      .E6: Piece(owner: .black, class: .circle, index: 1),
+      .F5: Piece(owner: .black, class: .circle, index: 2),
       .F6: Piece(owner: .black, class: .square, index: 1),
     ]
 
@@ -138,12 +138,12 @@ extension Board {
   // swiftlint:disable identifier_name
 
   public enum RankFile: Int, Hashable {
-    case A1, A2, A3, A4, A5, A6
-    case B1, B2, B3, B4, B5, B6
-    case C1, C2, C3, C4, C5, C6
-    case D1, D2, D3, D4, D5, D6
-    case E1, E2, E3, E4, E5, E6
-    case F1, F2, F3, F4, F5, F6
+    case A6, B6, C6, D6, E6, F6
+    case A5, B5, C5, D5, E5, F5
+    case A4, B4, C4, D4, E4, F4
+    case A3, B3, C3, D3, E3, F3
+    case A2, B2, C2, D2, E2, F2
+    case A1, B1, C1, D1, E1, F1
 
     public var toCoord: (x: Int, y: Int) {
       (rawValue % 6, rawValue / 6)
@@ -151,39 +151,45 @@ extension Board {
 
     public func isWithinStartZone(for player: Player) -> Bool {
       switch self {
-      case .F1, .E1, .F2, .D1, .E2, .F3: return player == .white
-      case .A6, .A5, .B6, .A4, .B5, .C6: return player == .black
+      case .A1, .B1, .C1, .A2, .B2, .A3: return player == .white
+      case .D6, .E6, .F6, .E5, .F5, .F4: return player == .black
       default: return false
       }
     }
 
     var up: RankFile? {
-      RankFile(rawValue: rawValue - 6)
+      return self.subtracting(y: 1)
     }
 
     var down: RankFile? {
-      RankFile(rawValue: rawValue + 6)
+      return self.adding(y: 1)
     }
 
     var left: RankFile? {
-      let (x, y) = toCoord
-      return ((y - 1) * 6 + x).toRankFile
+      return self.subtracting(x: 1)
     }
 
     var right: RankFile? {
-      let (x, y) = toCoord
-      return ((y + 1) * 6 + x).toRankFile
+      return self.adding(x: 1)
     }
 
     public func adding(x xd: Int? = nil, y yd: Int? = nil) -> RankFile? {
       let (x, y) = toCoord
-      return ((y + (yd ?? 0)) * 6 + x + (xd ?? 0)).toRankFile
+      let xx = x + (xd ?? 0)
+      let yy = y + (yd ?? 0)
+      guard Self.validBoardRange.contains(xx) && Self.validBoardRange.contains(yy) else { return nil }
+      return (yy * 6 + xx).toRankFile
     }
 
     public func subtracting(x xd: Int? = nil, y yd: Int? = nil) -> RankFile? {
       let (x, y) = toCoord
-      return ((y - (yd ?? 0)) * 6 + x - (xd ?? 0)).toRankFile
+      let xx = x - (xd ?? 0)
+      let yy = y - (yd ?? 0)
+      guard Self.validBoardRange.contains(xx) && Self.validBoardRange.contains(yy) else { return nil }
+      return (yy * 6 + xx).toRankFile
     }
+
+    private static let validBoardRange = (0..<Board.size)
   }
 
   // swiftlint:enable identifier_name
