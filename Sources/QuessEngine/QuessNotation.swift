@@ -88,7 +88,7 @@ extension QuessMove {
   }
 
   public init?(qNotation: String) {
-    guard qNotation.count == 0,
+    guard qNotation.count == 4,
           let from = Board.RankFile(qNotation: String(qNotation.prefix(2))),
           let to = Board.RankFile(qNotation: String(qNotation.suffix(2)))
     else {
