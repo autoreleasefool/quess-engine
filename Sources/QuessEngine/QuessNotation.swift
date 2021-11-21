@@ -64,13 +64,13 @@ extension Board.RankFile {
 
   public var qNotation: String {
     let (x, y) = self.toCoord
-    return "\(x.fileNotation)\(y.rankNotation)"
+    return "\(y.rankNotation)\(x.fileNotation)"
   }
 
   public init?(qNotation: String) {
     guard qNotation.count == 2,
-          let x = qNotation.first?.file,
-          let y = qNotation.last?.rank
+          let y = qNotation.first?.rank,
+          let x = qNotation.last?.file
     else {
       return nil
     }
