@@ -6,7 +6,7 @@ public class GameState {
 
   public let board = Board()
 
-  private var updates: [Board.Update] = []
+  internal private(set) var updates: [Board.Update] = []
 
   public var history: [Movement] {
     updates.map { $0.movement }
@@ -43,6 +43,17 @@ public class GameState {
     return !isFinished &&
       movement.piece.owner == currentPlayer &&
       movement.piece.canMove(to: movement.to, in: self)
+  }
+
+  @discardableResult public func apply(_ quessMove: QuessMove) -> Bool {
+    guard let piece = board.pieceAt(quessMove.from) else { return false }
+    let movement = Movement(piece: piece, to: quessMove.to)
+    let update = board.move(piece: piece, from: quessMove.from, to: quessMove.to)
+    updates.append(update)
+    currentPlayer = currentPlayer.next
+
+    updateWinState(afterMove: movement)
+    return true
   }
 
   @discardableResult public func apply(_ movement: Movement) -> Bool {
@@ -92,8 +103,10 @@ public class GameState {
 // MARK: End state
 
 extension GameState {
+
   public enum EndState {
     case draw
     case ended(winner: Player)
   }
+
 }

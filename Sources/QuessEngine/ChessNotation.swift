@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension Character {
+private extension Character {
 
   var file: Int? {
     switch self {
@@ -32,7 +32,7 @@ extension Character {
 
 }
 
-extension Int {
+private extension Int {
 
   var rankNotation: String {
     switch self {
@@ -62,15 +62,15 @@ extension Int {
 
 extension Board.RankFile {
 
-  public var notation: String {
+  public var cNotation: String {
     let (x, y) = self.toCoord
     return "\(x.fileNotation)\(y.rankNotation)"
   }
 
-  public init?(notation: String) {
-    guard notation.count == 2,
-          let x = notation.first?.file,
-          let y = notation.last?.rank
+  public init?(cNotation: String) {
+    guard cNotation.count == 2,
+          let x = cNotation.first?.file,
+          let y = cNotation.last?.rank
     else {
       return nil
     }
@@ -83,15 +83,15 @@ extension Board.RankFile {
 
 extension Player {
 
-  public init?(notation: String) {
-    switch notation {
+  public init?(cNotation: String) {
+    switch cNotation {
     case "w": self = .white
     case "b": self = .black
     default: return nil
     }
   }
 
-  public var notation: String {
+  public var cNotation: String {
     switch self {
     case .white: return "w"
     case .black: return "b"
@@ -102,11 +102,11 @@ extension Player {
 
 extension Piece {
 
-  public init?(notation: String) {
-    guard (2...3).contains(notation.count),
-          let owner = Player(notation: String(notation[notation.startIndex])),
+  public init?(cNotation: String) {
+    guard (2...3).contains(cNotation.count),
+          let owner = Player(cNotation: String(cNotation[cNotation.startIndex])),
           let `class` = Piece.Class(
-            notation: String(notation[notation.index(after: notation.startIndex)])
+            cNotation: String(cNotation[cNotation.index(after: cNotation.startIndex)])
           )
     else {
       return nil
@@ -120,22 +120,22 @@ extension Piece {
       return
     }
 
-    guard let index = Int(String(notation[notation.index(notation.startIndex, offsetBy: 2)])) else { return nil }
+    guard let index = Int(String(cNotation[cNotation.index(cNotation.startIndex, offsetBy: 2)])) else { return nil }
     self.index = index
   }
 
-  public var notation: String {
+  public var cNotation: String {
     self.class.isUniquePerPlayer
-      ? "\(self.owner.notation)\(self.class.notation)"
-      : "\(self.owner.notation)\(self.class.notation)\(self.index)"
+      ? "\(self.owner.cNotation)\(self.class.cNotation)"
+      : "\(self.owner.cNotation)\(self.class.cNotation)\(self.index)"
   }
 
 }
 
 extension Piece.Class {
 
-  public init?(notation: String) {
-    switch notation {
+  public init?(cNotation: String) {
+    switch cNotation {
     case "C": self = .circle
     case "S": self = .square
     case "T": self = .triangle
@@ -143,7 +143,7 @@ extension Piece.Class {
     }
   }
 
-  public var notation: String {
+  public var cNotation: String {
     switch self {
     case .circle: return "C"
     case .square: return "S"
@@ -155,14 +155,14 @@ extension Piece.Class {
 
 extension Movement {
 
-  public var notation: String {
-    "\(piece.notation)\(to.notation)"
+  public var cNotation: String {
+    "\(piece.cNotation)\(to.cNotation)"
   }
 
-  public init?(notation: String) {
-    guard (4...5).contains(notation.count),
-          let piece = Piece(notation: String(notation.dropLast(2))),
-          let to = Board.RankFile(notation: String(notation.suffix(2)))
+  public init?(cNotation: String) {
+    guard (4...5).contains(cNotation.count),
+          let piece = Piece(cNotation: String(cNotation.dropLast(2))),
+          let to = Board.RankFile(cNotation: String(cNotation.suffix(2)))
     else {
       return nil
     }
@@ -175,13 +175,13 @@ extension Movement {
 
 extension GameState {
 
-  public func apply(_ notation: String) -> Bool {
-    guard let movement = Movement(notation: notation) else { return false }
+  public func apply(_ cNotation: String) -> Bool {
+    guard let movement = Movement(cNotation: cNotation) else { return false }
     return self.apply(movement)
   }
 
-  public func historicalNotation() -> [String] {
-    history.map(\.notation)
+  public func historicalCNotation() -> [String] {
+    history.map(\.cNotation)
   }
 
 }

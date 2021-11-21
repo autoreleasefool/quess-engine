@@ -102,7 +102,7 @@ public class Board {
 
   // MARK: Movements
 
-  func move(piece: Piece, from: Board.RankFile, to: Board.RankFile) -> Update {
+  internal func move(piece: Piece, from: Board.RankFile, to: Board.RankFile) -> Update {
     let captured = grid[to]
     grid[from] = nil
     grid[to] = piece
@@ -115,7 +115,7 @@ public class Board {
     return Update(movement: Movement(piece: piece, to: to), from: from, capture: captured)
   }
 
-  func undo(_ update: Update) {
+  internal func undo(_ update: Update) {
     grid[update.movement.to] = update.capture
     grid[update.from] = update.movement.piece
 

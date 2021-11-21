@@ -31,17 +31,17 @@ struct StateProvider {
 
   func validMoves(fromNotation notation: [String]) -> [Movement] {
     notation
-      .compactMap { Movement(notation: $0) }
+      .compactMap { Movement(cNotation: $0) }
   }
 
   func validNotation(fromNotation notation: [String]) -> [String] {
     validMoves(fromNotation: notation)
-      .map(\.notation)
+      .map(\.cNotation)
       .sorted()
   }
 
   func notation(fromMoves moves: [Movement]) -> [String] {
-    moves.map(\.notation)
+    moves.map(\.cNotation)
       .sorted()
   }
 

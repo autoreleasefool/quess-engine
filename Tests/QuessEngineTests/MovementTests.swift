@@ -69,7 +69,7 @@ final class MovementTests: XCTestCase {
     XCTAssertEqual(possibleBlackSquareMoves, expectedBlackSquareMoves)
   }
 
-  func testMoves() {
+  func testInvalidState1() {
     let state = stateProvider.buildState(withMoves: "wT1A4; bC1C5; wC1C3; bC1D3; wC2D2; bC1C1")
 
     let expectedMoves = stateProvider.validNotation(fromNotation: [

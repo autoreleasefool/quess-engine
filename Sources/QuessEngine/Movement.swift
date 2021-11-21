@@ -15,3 +15,15 @@ public struct Movement: Hashable {
   }
 
 }
+
+public struct QuessMove: Hashable {
+
+  public let from: Board.RankFile
+  public let to: Board.RankFile
+
+  public init(from: Board.RankFile, to: Board.RankFile) {
+    self.from = from
+    self.to = to
+  }
+
+}
